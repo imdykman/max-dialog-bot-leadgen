@@ -1,0 +1,24 @@
+﻿# Зависимости Node.js
+node_modules/
+
+# Переменные окружения (НИКОГДА не коммитим!)
+.env
+.env.local
+.env.*.local
+
+# Логи и кэш
+*.log
+npm-debug.log*
+
+# Локальные данные
+analytics.json
+data/
+
+# ОС и IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Временные файлы
+*.tmp

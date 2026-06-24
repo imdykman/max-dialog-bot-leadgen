@@ -1,0 +1,14 @@
+{
+  "name": "demo-bot",
+  "version": "1.0.0",
+  "description": "Бот-лидогенератор для продажи чат-ботов",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "@maxhub/max-bot-api": "^0.2.2",
+    "dotenv": "^17.4.2"
+  }
+}
