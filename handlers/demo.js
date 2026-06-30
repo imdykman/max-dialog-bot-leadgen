@@ -52,10 +52,27 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
   if (!state.data) state.data = {};
 
   switch (action) {
+    // ========== ВЫБОР УСЛУГИ ==========
     case "demo_hair_haircut":
-      state.data = { service: "Стрижка", price: "от 1500 ₽" };
+    case "demo_hair_color":
+    case "demo_hair_nails":
+    case "demo_hair_styling":
+      // Определяем услугу и цену
+      const services = {
+        demo_hair_haircut: { name: "Стрижка", price: "от 1500 ₽", emoji: "✂️" },
+        demo_hair_color: {
+          name: "Окрашивание",
+          price: "от 3500 ₽",
+          emoji: "🎨",
+        },
+        demo_hair_nails: { name: "Маникюр", price: "от 1200 ₽", emoji: "💅" },
+        demo_hair_styling: { name: "Укладка", price: "от 1000 ₽", emoji: "💇‍♀️" },
+      };
+      const service = services[action];
+      state.data = { service: service.name, price: service.price };
+
       await ctx.reply(
-        `✂️ *Стрижка*\n\nОтличный выбор! Стоимость — от 1500 ₽.\n\nК какому мастеру хотите записаться?`,
+        `${service.emoji} *${service.name}*\n\nОтличный выбор! Стоимость — ${service.price}.\n\nК какому мастеру хотите записаться?`,
         {
           attachments: [
             Keyboard.inlineKeyboard([
@@ -84,6 +101,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       );
       break;
 
+    // ========== ВЫБОР МАСТЕРА ==========
     case "demo_hair_master_anna":
     case "demo_hair_master_dima":
     case "demo_hair_master_elena":
@@ -113,6 +131,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       );
       break;
 
+    // ========== ВЫБОР ДАТЫ ==========
     case "demo_hair_today":
     case "demo_hair_tomorrow":
     case "demo_hair_day_after":
@@ -146,6 +165,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       );
       break;
 
+    // ========== ВЫБОР ВРЕМЕНИ ==========
     case "demo_hair_time_10":
     case "demo_hair_time_12":
     case "demo_hair_time_14":
@@ -172,6 +192,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       );
       break;
 
+    // ========== ПОДТВЕРЖДЕНИЕ ==========
     case "demo_hair_confirm":
       await ctx.reply(
         `🎉 *Готово! Вы записаны!*\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nЖдём вас ${state.data.date} в ${state.data.time}.\n\n📱 За час до визита пришлём напоминание.\n\nЕсли нужно отменить или перенести запись — просто напишите мне!`,
@@ -515,7 +536,7 @@ async function endDemo(ctx, userId, userStates) {
   const demoType = state?.demo_type || "unknown";
 
   await ctx.reply(
-    `✨ *Вот так работает бот для бизнеса!*\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nЭтот бот может:\n\n✅ Работать 24/7 без выходных\n✅ Принимать заявки и записи\n✅ Собирать базу клиентов\n✅ Напоминать о визитах\n✅ Интегрироваться с вашей CRM\n✅ Отправлять уведомления менеджеру\n\n🚀 *Хотите такого же бота для своего бизнеса?*\n\nНажмите кнопку ниже, и я рассчитаю стоимость!`,
+    `✨ *Вот так работает бот для бизнеса!*\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nЭтот бот может:\n\n✅ Работать 24/7 без выходных\n✅ Принимать заявки и записи\n✅ Собирать имя и телефон клиента\n✅ Валидировать номера телефонов\n✅ Отправлять заявки на email менеджеру\n✅ Интегрироваться с вашей CRM\n\n🚀 *Хотите такого же бота для своего бизнеса?*\n\nНажмите кнопку ниже, и я покажу, как бот собирает контакты клиентов!`,
     {
       attachments: [
         Keyboard.inlineKeyboard([
