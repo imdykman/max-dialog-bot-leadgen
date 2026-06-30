@@ -6,17 +6,15 @@ require("dotenv").config();
 const { getUserId } = require("./utils/getUserId");
 const { userStates } = require("./services/states");
 const { sendWelcome, handlePricing } = require("./handlers/welcome");
-const { handleSupport, handleSupportAction } = require("./handlers/support");
 const { handleDemoAction, handleDemoTextInput } = require("./handlers/demo");
-const {
-  handleOrderStart,
-  handleOrderStep,
-  handleRetryContact,
-} = require("./handlers/order");
+const { handleOrderStart, handleOrderStep, handleRetryContact } = require("./handlers/order");
+const { handleSupport, handleSupportAction, handleSupportTextInput } = require("./handlers/support");
 
 // ========== СОЗДАНИЕ БОТА ==========
 const BOT_TOKEN = process.env.MAX_BOT_API_TOKEN;
-const bot = new Bot(BOT_TOKEN);
+const bot = new Bot(BOT_TOKEN, {
+  apiBaseUrl: process.env.MAX_API_BASE_URL || 'https://platform-api2.max.ru'
+});
 
 // ========== ОБРАБОТЧИКИ СОБЫТИЙ ==========
 
@@ -103,7 +101,19 @@ bot.on("message_created", async (ctx) => {
     state ? `mode=${state.mode}, step=${state.step}` : "NO STATE",
   );
 
-  // 1. Обработка текстовых ответов для ЗАКАЗА (имя, контакт)
+  // 1. Обработка текстовых вопросов в ПОДДЕРЖКЕ (YandexGPT)
+  const supportHandled = await handleSupportTextInput(
+    ctx,
+    userId,
+    text,
+    userStates,
+  );
+  if (supportHandled) {
+    console.log(`✅ Support question handled by YandexGPT`);
+    return;
+  }
+
+  // 2. Обработка текстовых ответов для ЗАКАЗА (имя, контакт)
   if (state && state.mode === "order") {
     console.log(
       `✅ Order mode detected, calling handleOrderStep with text: "${text}"`,
@@ -112,14 +122,19 @@ bot.on("message_created", async (ctx) => {
     return;
   }
 
-  // 2. Обработка адреса в ДОСТАВКЕ (демо-режим)
-  const handled = await handleDemoTextInput(ctx, userId, text, userStates);
-  if (handled) {
+  // 3. Обработка адреса в ДОСТАВКЕ (демо-режим)
+  const deliveryHandled = await handleDemoTextInput(
+    ctx,
+    userId,
+    text,
+    userStates,
+  );
+  if (deliveryHandled) {
     console.log(`✅ Delivery address mode detected`);
     return;
   }
 
-  // 3. Если ничего не подошло — показываем приветствие
+  // 4. Если ничего не подошло — показываем приветствие
   console.log(`❌ No matching mode, showing welcome`);
   await sendWelcome(ctx, userId, userStates);
 });
