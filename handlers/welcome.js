@@ -55,4 +55,4 @@ async function handleSupport(ctx, userId) {
   if (userId) trackEvent('support', userId);
 }
 
-module.exports = { sendWelcome, handlePricing, handleSupport };
+module.exports = { sendWelcome, handlePricing };
