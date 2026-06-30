@@ -10,7 +10,20 @@ const bot = new Bot(BOT_TOKEN);
 
 // ========== ХРАНИЛИЩЕ СОСТОЯНИЙ ==========
 const userStates = new Map();
-
+// ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ USERID ==========
+function getUserId(ctx) {
+  // Для callback-кнопок
+  if (ctx.callback?.user?.user_id) {
+    return ctx.callback.user.user_id.toString();
+  }
+  
+  // Для текстовых сообщений
+  if (ctx.message?.sender?.user_id) {
+    return ctx.message.sender.user_id.toString();
+  }
+  
+  return null;
+}
 // ========== АНАЛИТИКА ==========
 const ANALYTICS_FILE = path.join(process.cwd(), 'analytics.json');
 
@@ -458,13 +471,243 @@ async function endDemo(ctx, userId) {
   userStates.delete(userId);
 }
 
-// ========== ЗАГЛУШКИ: ЗАКАЗ И ПОДДЕРЖКА ==========
-async function handleOrderStart(ctx) {
-  await ctx.reply('💼 *Заказать бота*\n\n(Этот раздел будет в следующем шаге)');
+// ========== ЗАКАЗ БОТА: КВАЛИФИКАЦИЯ ==========
+const ORDER_STEPS = {
+  BUSINESS_TYPE: 'business_type',
+  BUSINESS_SIZE: 'business_size',
+  FEATURES: 'features',
+  CLIENTS_COUNT: 'clients_count',
+  NAME: 'name',
+  CONTACT: 'contact',
+  CALL_TIME: 'call_time',
+  DONE: 'done'
+};
+
+async function handleOrderStart(ctx, userId) {
+  userStates.set(userId, { 
+    mode: 'order', 
+    step: ORDER_STEPS.BUSINESS_TYPE,
+    data: {}
+  });
+  
+  await ctx.reply(
+    `💼 *Заказать бота*\n\nОтлично! Давайте подберём идеальное решение для вашего бизнеса. 🎯\n\nСначала расскажите о вашем бизнесе:`,
+    {
+      attachments: [Keyboard.inlineKeyboard([
+        [Keyboard.button.callback('💇 Красота (салоны, барбершопы)', 'order_beauty')],
+        [Keyboard.button.callback('🍕 Доставка / Рестораны', 'order_food')],
+        [Keyboard.button.callback('🏥 Медицина / Стоматология', 'order_med')],
+        [Keyboard.button.callback('🏗️ Услуги / Сервис', 'order_service')],
+        [Keyboard.button.callback('🛍️ Торговля', 'order_retail')],
+        [Keyboard.button.callback('🤔 Другое / Не знаю', 'order_other')]
+      ])]
+    }
+  );
+  
+  trackEvent('order_start', userId);
 }
 
+async function handleOrderStep(ctx, userId, data) {
+  console.log(`\n📝 HANDLE_ORDER_STEP | userId: ${userId} | data: "${data}"`);
+  
+  const state = userStates.get(userId);
+  console.log(`📊 Current state:`, state ? `mode=${state.mode}, step=${state.step}` : 'NO STATE');
+  
+  if (!state || state.mode !== 'order') {
+    console.log(`❌ State not found or mode !== 'order', returning`);
+    return;
+  }
+  
+  console.log(`✅ Processing step: ${state.step}`);
+  
+  switch (state.step) {
+    case ORDER_STEPS.BUSINESS_TYPE:
+      state.data.business_type = data;
+      state.step = ORDER_STEPS.BUSINESS_SIZE;
+      await ctx.reply(
+        `Какой у вас масштаб?`,
+        {
+          attachments: [Keyboard.inlineKeyboard([
+            [Keyboard.button.callback('1 точка', 'size_1')],
+            [Keyboard.button.callback('2-5 точек', 'size_2_5')],
+            [Keyboard.button.callback('Больше 5', 'size_5+')],
+            [Keyboard.button.callback('Пока нет, только запускаюсь', 'size_0')]
+          ])]
+        }
+      );
+      break;
+      
+    case ORDER_STEPS.BUSINESS_SIZE:
+      state.data.business_size = data;
+      state.step = ORDER_STEPS.FEATURES;
+      await ctx.reply(
+        `Что должен делать бот? (можно несколько)`,
+        {
+          attachments: [Keyboard.inlineKeyboard([
+            [Keyboard.button.callback('📅 Запись / Бронирование', 'feat_booking')],
+            [Keyboard.button.callback('🛒 Приём заказов', 'feat_orders')],
+            [Keyboard.button.callback('❓ Ответы на вопросы', 'feat_faq')],
+            [Keyboard.button.callback('📢 Рассылки клиентам', 'feat_broadcast')],
+            [Keyboard.button.callback('✨ Всё вместе', 'feat_all')]
+          ])]
+        }
+      );
+      break;
+      
+    case ORDER_STEPS.FEATURES:
+      state.data.features = data;
+      state.step = ORDER_STEPS.CLIENTS_COUNT;
+      await ctx.reply(
+        `Примерное количество клиентов в месяц?`,
+        {
+          attachments: [Keyboard.inlineKeyboard([
+            [Keyboard.button.callback('До 50', 'clients_50')],
+            [Keyboard.button.callback('50-200', 'clients_200')],
+            [Keyboard.button.callback('200-500', 'clients_500')],
+            [Keyboard.button.callback('Больше 500', 'clients_500+')],
+            [Keyboard.button.callback('Не знаю', 'clients_unknown')]
+          ])]
+        }
+      );
+      break;
+      
+    case ORDER_STEPS.CLIENTS_COUNT:
+      state.data.clients_count = data;
+      state.step = ORDER_STEPS.NAME;
+      await ctx.reply(`Отлично! Как к вам обращаться? 👤`);
+      break;
+      
+    case ORDER_STEPS.NAME:
+      state.data.name = data;
+      state.step = ORDER_STEPS.CONTACT;
+      await ctx.reply(`Отлично, ${data}! 📱\n\nОставьте телефон или @username для связи:`);
+      break;
+      
+    case ORDER_STEPS.CONTACT:
+      state.data.contact = data;
+      state.step = ORDER_STEPS.CALL_TIME;
+      await ctx.reply(
+        `Когда вам удобно принять звонок?`,
+        {
+          attachments: [Keyboard.inlineKeyboard([
+            [Keyboard.button.callback('Утром (9-12)', 'time_morning')],
+            [Keyboard.button.callback('Днём (12-17)', 'time_day')],
+            [Keyboard.button.callback('Вечером (17-20)', 'time_evening')],
+            [Keyboard.button.callback('📞 Позвоните сейчас', 'time_now')]
+          ])]
+        }
+      );
+      break;
+      
+    case ORDER_STEPS.CALL_TIME:
+      state.data.call_time = data;
+      
+      await saveLead(userId, state.data);
+      await sendManagerEmail(state.data);
+      await showThankYou(ctx, state.data);
+      
+      trackEvent('order_complete', userId, state.data);
+      userStates.delete(userId);
+      return; // ← ВАЖНО: return, а не break! Чтобы не сохранять удалённое состояние
+  }
+  
+  // ОДИН РАЗ сохраняем состояние в конце
+  console.log(`💾 Saving state | new step: ${state.step}`);
+  userStates.set(userId, state);
+}
+
+// ========== СОХРАНЕНИЕ ЛИДА ==========
+const LEADS_FILE = path.join(process.cwd(), 'leads.json');
+
+async function saveLead(userId, data) {
+  const lead = {
+    id: Date.now(),
+    userId,
+    ...data,
+    created_at: new Date().toISOString(),
+    status: 'new'
+  };
+  
+  try {
+    let leads = [];
+    if (fs.existsSync(LEADS_FILE)) {
+      leads = JSON.parse(fs.readFileSync(LEADS_FILE, 'utf-8'));
+    }
+    leads.push(lead);
+    fs.writeFileSync(LEADS_FILE, JSON.stringify(leads, null, 2));
+    console.log(`✅ Лид сохранён: ${data.name} (${data.contact})`);
+  } catch (e) {
+    console.error('Ошибка сохранения лида:', e);
+  }
+}
+
+// ========== EMAIL МЕНЕДЖЕРУ ==========
+async function sendManagerEmail(data) {
+  if (!process.env.SMTP_USER || !process.env.MANAGER_EMAIL) {
+    console.log('⚠️ Email не настроен, пропускаем отправку');
+    return;
+  }
+  
+  try {
+    const nodemailer = require('nodemailer');
+    
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT),
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+    
+    await transporter.sendMail({  
+      from: process.env.SMTP_USER,
+      to: process.env.MANAGER_EMAIL,
+      subject: `🔥 Новый лид: ${data.name}`,
+      html: `
+        <h2>🔥 Новая заявка на бота!</h2>
+        <table style="border-collapse: collapse; width: 100%;">
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Имя:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.name}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Контакт:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.contact}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Сфера:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.business_type}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Масштаб:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.business_size}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Функции:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.features}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Клиентов/мес:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.clients_count}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Удобное время:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${data.call_time}</td></tr>
+        </table>
+        <p style="margin-top: 20px; color: #666;">Заявка получена: ${new Date().toLocaleString('ru-RU')}</p>
+      `
+    });
+    
+    console.log(`✅ Email отправлен менеджеру: ${process.env.MANAGER_EMAIL}`);
+  } catch (e) {
+    console.error('Ошибка отправки email:', e);
+  }
+}
+
+// ========== ФИНАЛЬНЫЙ ЭКРАН ==========
+async function showThankYou(ctx, data) {
+  await ctx.reply(
+    `✅ *Заявка принята!*\n\n━━━━━━━━━━━━━━━━━━━━━━\n\n📋 *Что дальше:*\n1. Менеджер свяжется с вами в течение 30 минут\n2. Обсудит детали и покажет расчёт\n3. Предложит готовое решение или разработает с нуля\n\n🎁 *Бонус*: при заказе до конца недели — настройка YandexGPT в подарок!\n\nСпасибо, ${data.name}! 💚`,
+    {
+      attachments: [Keyboard.inlineKeyboard([
+        [Keyboard.button.callback('🏠 Главное меню', 'start')]
+      ])]
+    }
+  );
+}
+
+// ========== ПОДДЕРЖКА ==========
 async function handleSupport(ctx) {
-  await ctx.reply('🆘 *Поддержка*\n\n(Этот раздел будет в следующем шаге)');
+  await ctx.reply(
+    `🆘 *Поддержка*\n\nЭтот раздел будет добавлен в следующем обновлении.\n\nА пока вы можете:\n• Написать нам в Telegram: @your_username\n• Позвонить: +7 (XXX) XXX-XX-XX\n• Email: support@yourcompany.ru`,
+    {
+      attachments: [Keyboard.inlineKeyboard([
+        [Keyboard.button.callback('⬅️ Назад', 'start')]
+      ])]
+    }
+  );
 }
 
 // ========== ОБРАБОТЧИКИ СОБЫТИЙ ==========
@@ -476,7 +719,7 @@ bot.on('bot_started', async (ctx) => {
 
 // Команда /start
 bot.command('start', async (ctx) => {
-  const userId = ctx.message?.sender?.user_id?.toString();
+  const userId = getUserId(ctx);  // ← ИСПРАВЛЕНО
   if (userId) userStates.delete(userId);
   await sendWelcome(ctx);
   trackEvent('start', userId);
@@ -485,9 +728,9 @@ bot.command('start', async (ctx) => {
 // Callback-кнопки
 bot.on('message_callback', async (ctx) => {
   const data = ctx.callback.payload;
-  const userId = ctx.message?.sender?.user_id?.toString();
+  const userId = getUserId(ctx);  // ← ИСПРАВЛЕНО
   
-  console.log(`🔘 НАЖАТА КНОПКА: ${data}`);
+  console.log(`\n🔘 НАЖАТА КНОПКА: ${data} | userId: ${userId}`);
   
   if (!userId) return;
   
@@ -512,7 +755,7 @@ bot.on('message_callback', async (ctx) => {
   }
   
   if (data === 'order_start') {
-    await handleOrderStart(ctx);
+    await handleOrderStart(ctx, userId);
     trackEvent('order_start', userId);
     return;
   }
@@ -548,6 +791,14 @@ bot.on('message_callback', async (ctx) => {
     return;
   }
   
+  // Заказ: обработка кнопок
+  if (data.startsWith('order_') || data.startsWith('size_') || 
+      data.startsWith('feat_') || data.startsWith('clients_') || 
+      data.startsWith('time_')) {
+    await handleOrderStep(ctx, userId, data);
+    return;
+  }
+  
   // Шаги демо
   if (data.startsWith('demo_hair_')) {
     await handleDemoHairStep(ctx, userId, data);
@@ -566,12 +817,23 @@ bot.on('message_callback', async (ctx) => {
 // Текстовые сообщения
 bot.on('message_created', async (ctx) => {
   const text = ctx.message?.body?.text || '';
-  const userId = ctx.message?.sender?.user_id?.toString();
+  const userId = getUserId(ctx);  // ← ИСПРАВЛЕНО
+  
+  console.log(`\n📩 MESSAGE_CREATED | text: "${text}" | userId: ${userId}`);
   
   if (text.startsWith('/')) return;
+  if (!userId) return;
   
-  // Обработка адреса в доставке
   const state = userStates.get(userId);
+  console.log(`📊 State found:`, state ? `mode=${state.mode}, step=${state.step}` : 'NO STATE');
+  
+  // 1. Обработка текстовых ответов для ЗАКАЗА
+  if (state && state.mode === 'order') {
+    await handleOrderStep(ctx, userId, text);
+    return;
+  }
+  
+  // 2. Обработка адреса в ДОСТАВКЕ
   if (state && state.mode === 'demo' && state.demo_type === 'delivery' && state.step === 'address') {
     state.data.address = text;
     state.step = 'payment';
@@ -589,10 +851,10 @@ bot.on('message_created', async (ctx) => {
     return;
   }
   
-  // Если ничего не подошло — показываем приветствие
+  // 3. Если ничего не подошло
   await sendWelcome(ctx);
 });
-
+  
 // ========== ЗАПУСК ==========
 bot.start();
 console.log('\n' + '='.repeat(50));

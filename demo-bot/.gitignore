@@ -1,7 +1,7 @@
 ﻿# Зависимости Node.js
 node_modules/
 
-# Переменные окружения (НИКОГДА не коммитим!)
+# Переменные окружения (СЕКРЕТЫ!)
 .env
 .env.local
 .env.*.local
@@ -10,8 +10,9 @@ node_modules/
 *.log
 npm-debug.log*
 
-# Локальные данные
+# Локальные данные (персональные данные лидов!)
 analytics.json
+leads.json
 data/
 
 # ОС и IDE
