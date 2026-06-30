@@ -76,14 +76,14 @@ async function handleOrderStep(ctx, userId, data, userStates) {
       state.data.business_size = data;
       state.step = ORDER_STEPS.FEATURES;
       await ctx.reply(
-        `Что должен делать бот? (можно несколько)`,
+        `Что должен делать бот?`,
         {
           attachments: [Keyboard.inlineKeyboard([
             [Keyboard.button.callback('📅 Запись / Бронирование', 'feat_booking')],
             [Keyboard.button.callback('🛒 Приём заказов', 'feat_orders')],
             [Keyboard.button.callback('❓ Ответы на вопросы', 'feat_faq')],
             [Keyboard.button.callback('📢 Рассылки клиентам', 'feat_broadcast')],
-            [Keyboard.button.callback('✨ Всё вместе', 'feat_all')]
+            [Keyboard.button.callback('✨ Несколько задач', 'feat_all')]
           ])]
         }
       );
