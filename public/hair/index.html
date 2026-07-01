@@ -1,437 +1,641 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Салон красоты "Стиль" — Онлайн-запись</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 { font-size: 28px; margin-bottom: 10px; }
-        .header p { opacity: 0.9; font-size: 14px; }
-        
-        .screen { display: none; padding: 30px; }
-        .screen.active { display: block; }
-        
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .gallery-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-            aspect-ratio: 1;
-        }
-        
-        .gallery-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .gallery-item .label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .service-card {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .service-card:hover { background: #fce4ec; border-color: #f5576c; }
-        .service-card.selected { border-color: #f5576c; background: #fce4ec; }
-        
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 10px; /* Уменьшили с 20px */
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px; /* Уменьшили с 20px */
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 20px 15px; /* Уменьшили padding */
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 22px;
+        margin-bottom: 8px;
+      } /* Уменьшили размер */
+      .header p {
+        opacity: 0.9;
+        font-size: 13px;
+      }
+
+      .screen {
+        display: none;
+        padding: 20px 15px;
+      } /* Уменьшили padding */
+      .screen.active {
+        display: block;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px; /* Уменьшили gap */
+        margin: 15px 0;
+      }
+
+      .gallery-item {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s;
+        aspect-ratio: 1;
+      }
+
+      .gallery-item:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .gallery-item .label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px;
+        font-size: 12px; /* Уменьшили размер */
+        text-align: center;
+        word-wrap: break-word; /* Перенос слов */
+        overflow-wrap: break-word;
+      }
+
+      .service-card {
+        display: flex;
+        align-items: flex-start; /* Изменили с center */
+        padding: 12px; /* Уменьшили padding */
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .service-card:hover {
+        background: #fce4ec;
+        border-color: #f5576c;
+      }
+      .service-card.selected {
+        border-color: #f5576c;
+        background: #fce4ec;
+      }
+
+      .service-card img {
+        width: 70px; /* Уменьшили с 80px */
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-right: 12px;
+        flex-shrink: 0; /* Чтобы картинка не сжималась */
+      }
+
+      .service-info {
+        flex: 1;
+        min-width: 0; /* Важно для переноса текста */
+      }
+
+      .service-info h3 {
+        font-size: 15px; /* Уменьшили с 18px */
+        color: #333;
+        margin-bottom: 5px;
+        word-wrap: break-word; /* Перенос слов */
+        overflow-wrap: break-word;
+      }
+
+      .service-info p {
+        font-size: 12px; /* Уменьшили с 14px */
+        color: #666;
+        margin-bottom: 5px;
+        line-height: 1.4; /* Увеличили межстрочный интервал */
+        word-wrap: break-word; /* Перенос слов */
+        overflow-wrap: break-word;
+        hyphens: auto; /* Автоматические переносы */
+      }
+
+      .service-info .price {
+        font-size: 14px; /* Уменьшили с 16px */
+        font-weight: 600;
+        color: #f5576c;
+      }
+
+      .specialists-grid {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(120px, 1fr)
+        ); /* Уменьшили minmax */
+        gap: 12px;
+        margin: 15px 0;
+      }
+
+      .specialist-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px 10px; /* Уменьшили padding */
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .specialist-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-color: #f5576c;
+      }
+
+      .specialist-card.selected {
+        border-color: #f5576c;
+        background: #fce4ec;
+      }
+
+      .specialist-card img {
+        width: 80px; /* Уменьшили с 100px */
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 8px;
+      }
+
+      .specialist-card h3 {
+        font-size: 14px; /* Уменьшили с 16px */
+        color: #333;
+        margin-bottom: 5px;
+        word-wrap: break-word;
+      }
+
+      .specialist-card p {
+        font-size: 12px; /* Уменьшили с 14px */
+        color: #666;
+        word-wrap: break-word;
+      }
+
+      .document-link {
+        display: block;
+        text-align: center;
+        color: #f5576c;
+        text-decoration: underline;
+        margin: 10px 0;
+        font-size: 13px; /* Уменьшили с 14px */
+        word-wrap: break-word;
+      }
+
+      .checkbox-container {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px; /* Уменьшили padding */
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .checkbox-container input[type="checkbox"] {
+        width: 18px; /* Уменьшили с 20px */
+        height: 18px;
+        margin-right: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .checkbox-container label {
+        font-size: 12px; /* Уменьшили с 14px */
+        color: #333;
+        cursor: pointer;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px; /* Уменьшили с 15px */
+        border: none;
+        border-radius: 10px;
+        font-size: 14px; /* Уменьшили с 16px */
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 15px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #f5576c;
+        border: 2px solid #f5576c;
+      }
+
+      .btn-secondary:hover {
+        background: #fce4ec;
+      }
+
+      .summary {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .summary-item:last-child {
+        border-bottom: none;
+      }
+      .summary-item strong {
+        color: #f5576c;
+      }
+
+      .success-icon {
+        font-size: 60px;
+        text-align: center;
+        margin: 20px 0;
+      } /* Уменьшили с 80px */
+
+      .back-btn {
+        background: none;
+        border: none;
+        color: #f5576c;
+        font-size: 13px; /* Уменьшили с 14px */
+        cursor: pointer;
+        margin-bottom: 15px;
+      }
+
+      .back-btn:hover {
+        text-decoration: underline;
+      }
+
+      h2 {
+        color: #333;
+        margin-bottom: 12px;
+        font-size: 18px; /* Уменьшили с 20px */
+        word-wrap: break-word;
+      }
+
+      /* Адаптация для очень маленьких экранов */
+      @media (max-width: 360px) {
         .service-card img {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            object-fit: cover;
-            margin-right: 15px;
+          width: 60px;
+          height: 60px;
         }
-        
-        .service-info { flex: 1; }
-        .service-info h3 { font-size: 18px; color: #333; margin-bottom: 5px; }
-        .service-info p { font-size: 14px; color: #666; margin-bottom: 5px; }
-        .service-info .price { font-size: 16px; font-weight: 600; color: #f5576c; }
-        
-        .specialists-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
+
+        .service-info h3 {
+          font-size: 14px;
         }
-        
-        .specialist-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
+
+        .service-info p {
+          font-size: 11px;
         }
-        
-        .specialist-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-color: #f5576c;
+
+        .header h1 {
+          font-size: 20px;
         }
-        
-        .specialist-card.selected { border-color: #f5576c; background: #fce4ec; }
-        
-        .specialist-card img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-        
-        .specialist-card h3 { font-size: 16px; color: #333; margin-bottom: 5px; }
-        .specialist-card p { font-size: 14px; color: #666; }
-        
-        .document-link {
-            display: block;
-            text-align: center;
-            color: #f5576c;
-            text-decoration: underline;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: flex-start;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .checkbox-container input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        
-        .checkbox-container label {
-            font-size: 14px;
-            color: #333;
-            cursor: pointer;
-            line-height: 1.5;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
-        }
-        
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #f5576c;
-            border: 2px solid #f5576c;
-        }
-        
-        .btn-secondary:hover { background: #fce4ec; }
-        
-        .summary {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .summary-item:last-child { border-bottom: none; }
-        .summary-item strong { color: #f5576c; }
-        
-        .success-icon { font-size: 80px; text-align: center; margin: 30px 0; }
-        
-        .back-btn {
-            background: none;
-            border: none;
-            color: #f5576c;
-            font-size: 14px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        
-        .back-btn:hover { text-decoration: underline; }
-        
-        h2 { color: #333; margin-bottom: 15px; }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>💇 Салон красоты "Стиль"</h1>
-            <p>Онлайн-запись к лучшим мастерам</p>
+      <div class="header">
+        <h1>💇 Салон красоты "Стиль"</h1>
+        <p>Онлайн-запись к лучшим мастерам</p>
+      </div>
+
+      <!-- Экран 1: Галерея работ -->
+      <div id="screen-gallery" class="screen active">
+        <h2>✨ Наши работы</h2>
+        <div class="gallery">
+          <div class="gallery-item">
+            <img
+              src="images/work1.jpg"
+              alt="Работа 1"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <div class="label">Стрижка + окрашивание</div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="images/work2.jpg"
+              alt="Работа 2"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <div class="label">Маникюр</div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="images/work3.jpg"
+              alt="Работа 3"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <div class="label">Укладка</div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="images/work4.jpg"
+              alt="Работа 4"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <div class="label">Окрашивание</div>
+          </div>
         </div>
-        
-        <!-- Экран 1: Галерея работ -->
-        <div id="screen-gallery" class="screen active">
-            <h2>✨ Наши работы</h2>
-            <div class="gallery">
-                <div class="gallery-item">
-                    <img src="images/work1.jpg" alt="Работа 1" onerror="this.src='images/placeholder.jpg'">
-                    <div class="label">Стрижка + окрашивание</div>
-                </div>
-                <div class="gallery-item">
-                    <img src="images/work2.jpg" alt="Работа 2" onerror="this.src='images/placeholder.jpg'">
-                    <div class="label">Маникюр</div>
-                </div>
-                <div class="gallery-item">
-                    <img src="images/work3.jpg" alt="Работа 3" onerror="this.src='images/placeholder.jpg'">
-                    <div class="label">Укладка</div>
-                </div>
-                <div class="gallery-item">
-                    <img src="images/work4.jpg" alt="Работа 4" onerror="this.src='images/placeholder.jpg'">
-                    <div class="label">Окрашивание</div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="showScreen('services')">Выбрать услугу →</button>
+        <button class="btn btn-primary" onclick="showScreen('services')">
+          Выбрать услугу →
+        </button>
+      </div>
+
+      <!-- Экран 2: Выбор услуги -->
+      <div id="screen-services" class="screen">
+        <button class="back-btn" onclick="showScreen('gallery')">
+          ← Назад к галерее
+        </button>
+        <h2>Выберите услугу</h2>
+        <div class="service-card" data-service="Стрижка" data-price="1500">
+          <img
+            src="images/service_haircut.jpg"
+            alt="Стрижка"
+            onerror="this.src = 'images/placeholder.jpg'"
+          />
+          <div class="service-info">
+            <h3>✂️ Стрижка</h3>
+            <p>Модельная стрижка с укладкой</p>
+            <div class="price">от 1 500 ₽</div>
+          </div>
         </div>
-        
-        <!-- Экран 2: Выбор услуги -->
-        <div id="screen-services" class="screen">
-            <button class="back-btn" onclick="showScreen('gallery')">← Назад к галерее</button>
-            <h2>Выберите услугу</h2>
-            <div class="service-card" data-service="Стрижка" data-price="1500">
-                <img src="images/service_haircut.jpg" alt="Стрижка" onerror="this.src='images/placeholder.jpg'">
-                <div class="service-info">
-                    <h3>✂️ Стрижка</h3>
-                    <p>Модельная стрижка с укладкой</p>
-                    <div class="price">от 1 500 ₽</div>
-                </div>
-            </div>
-            <div class="service-card" data-service="Окрашивание" data-price="3500">
-                <img src="images/service_color.jpg" alt="Окрашивание" onerror="this.src='images/placeholder.jpg'">
-                <div class="service-info">
-                    <h3>🎨 Окрашивание</h3>
-                    <p>Однотонное или сложное окрашивание</p>
-                    <div class="price">от 3 500 ₽</div>
-                </div>
-            </div>
-            <div class="service-card" data-service="Маникюр" data-price="1200">
-                <img src="images/service_nails.jpg" alt="Маникюр" onerror="this.src='images/placeholder.jpg'">
-                <div class="service-info">
-                    <h3>💅 Маникюр</h3>
-                    <p>Классический или аппаратный маникюр</p>
-                    <div class="price">от 1 200 ₽</div>
-                </div>
-            </div>
-            <div class="service-card" data-service="Укладка" data-price="1000">
-                <img src="images/service_styling.jpg" alt="Укладка" onerror="this.src='images/placeholder.jpg'">
-                <div class="service-info">
-                    <h3>💇‍♀️ Укладка</h3>
-                    <p>Профессиональная укладка</p>
-                    <div class="price">от 1 000 ₽</div>
-                </div>
-            </div>
-            <button class="btn btn-primary" id="btn-to-specialists" disabled>Выбрать мастера →</button>
+        <div class="service-card" data-service="Окрашивание" data-price="3500">
+          <img
+            src="images/service_color.jpg"
+            alt="Окрашивание"
+            onerror="this.src = 'images/placeholder.jpg'"
+          />
+          <div class="service-info">
+            <h3>🎨 Окрашивание</h3>
+            <p>Однотонное или сложное окрашивание</p>
+            <div class="price">от 3 500 ₽</div>
+          </div>
         </div>
-        
-        <!-- Экран 3: Выбор мастера -->
-        <div id="screen-specialists" class="screen">
-            <button class="back-btn" onclick="showScreen('services')">← Назад к услугам</button>
-            <h2>Выберите мастера</h2>
-            <div class="specialists-grid">
-                <div class="specialist-card" data-specialist="Анна">
-                    <img src="images/master_anna.jpg" alt="Анна" onerror="this.src='images/placeholder.jpg'">
-                    <h3>Анна</h3>
-                    <p>Стаж 5 лет</p>
-                </div>
-                <div class="specialist-card" data-specialist="Дмитрий">
-                    <img src="images/master_dmitry.jpg" alt="Дмитрий" onerror="this.src='images/placeholder.jpg'">
-                    <h3>Дмитрий</h3>
-                    <p>Стаж 8 лет</p>
-                </div>
-                <div class="specialist-card" data-specialist="Елена">
-                    <img src="images/master_elena.jpg" alt="Елена" onerror="this.src='images/placeholder.jpg'">
-                    <h3>Елена</h3>
-                    <p>Стаж 3 года</p>
-                </div>
-            </div>
-            <button class="btn btn-primary" id="btn-to-privacy" disabled>Далее →</button>
+        <div class="service-card" data-service="Маникюр" data-price="1200">
+          <img
+            src="images/service_nails.jpg"
+            alt="Маникюр"
+            onerror="this.src = 'images/placeholder.jpg'"
+          />
+          <div class="service-info">
+            <h3>💅 Маникюр</h3>
+            <p>Классический или аппаратный маникюр</p>
+            <div class="price">от 1 200 ₽</div>
+          </div>
         </div>
-        
-        <!-- Экран 4: Политика конфиденциальности -->
-        <div id="screen-privacy" class="screen">
-            <button class="back-btn" onclick="showScreen('specialists')">← Назад</button>
-            <h2>🔒 Согласие на обработку данных</h2>
-            <p style="color: #666; margin-bottom: 15px;">
-                Для завершения записи необходимо согласие на обработку персональных данных.
-            </p>
-            <p style="margin-bottom: 15px;">
-                <a href="../privacy.html" target="_blank" class="document-link">
-                    📄 Открыть Политику конфиденциальности
-                </a>
-            </p>
-            <div class="checkbox-container">
-                <input type="checkbox" id="checkbox-privacy">
-                <label for="checkbox-privacy">
-                    Я согласен на обработку персональных данных в соответствии с 
-                    <a href="../privacy.html" target="_blank" style="color: #f5576c;">Политикой конфиденциальности</a>
-                </label>
-            </div>
-            <button class="btn btn-primary" id="btn-to-summary" disabled>Продолжить →</button>
+        <div class="service-card" data-service="Укладка" data-price="1000">
+          <img
+            src="images/service_styling.jpg"
+            alt="Укладка"
+            onerror="this.src = 'images/placeholder.jpg'"
+          />
+          <div class="service-info">
+            <h3>💇‍♀️ Укладка</h3>
+            <p>Профессиональная укладка</p>
+            <div class="price">от 1 000 ₽</div>
+          </div>
         </div>
-        
-        <!-- Экран 5: Подтверждение -->
-        <div id="screen-summary" class="screen">
-            <button class="back-btn" onclick="showScreen('privacy')">← Назад</button>
-            <h2>✅ Подтверждение записи</h2>
-            <div class="summary">
-                <div class="summary-item">
-                    <span>Услуга:</span>
-                    <strong id="summary-service">-</strong>
-                </div>
-                <div class="summary-item">
-                    <span>Стоимость:</span>
-                    <strong id="summary-price">-</strong>
-                </div>
-                <div class="summary-item">
-                    <span>Мастер:</span>
-                    <strong id="summary-specialist">-</strong>
-                </div>
-            </div>
-            <button class="btn btn-primary" id="btn-confirm">Подтвердить запись</button>
+        <button class="btn btn-primary" id="btn-to-specialists" disabled>
+          Выбрать мастера →
+        </button>
+      </div>
+
+      <!-- Экран 3: Выбор мастера -->
+      <div id="screen-specialists" class="screen">
+        <button class="back-btn" onclick="showScreen('services')">
+          ← Назад к услугам
+        </button>
+        <h2>Выберите мастера</h2>
+        <div class="specialists-grid">
+          <div class="specialist-card" data-specialist="Анна">
+            <img
+              src="images/master_anna.jpg"
+              alt="Анна"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <h3>Анна</h3>
+            <p>Стаж 5 лет</p>
+          </div>
+          <div class="specialist-card" data-specialist="Дмитрий">
+            <img
+              src="images/master_dmitry.jpg"
+              alt="Дмитрий"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <h3>Дмитрий</h3>
+            <p>Стаж 8 лет</p>
+          </div>
+          <div class="specialist-card" data-specialist="Елена">
+            <img
+              src="images/master_elena.jpg"
+              alt="Елена"
+              onerror="this.src = 'images/placeholder.jpg'"
+            />
+            <h3>Елена</h3>
+            <p>Стаж 3 года</p>
+          </div>
         </div>
-        
-        <!-- Экран 6: Успех -->
-        <div id="screen-success" class="screen">
-            <div class="success-icon">🎉</div>
-            <h2 style="text-align: center;">Вы записаны!</h2>
-            <p style="text-align: center; margin: 20px 0; color: #666;">
-                Мы свяжемся с вами для подтверждения записи
-            </p>
-            <button class="btn btn-secondary" onclick="sendToBot()">Вернуться в бот</button>
+        <button class="btn btn-primary" id="btn-to-privacy" disabled>
+          Далее →
+        </button>
+      </div>
+
+      <!-- Экран 4: Политика конфиденциальности -->
+      <div id="screen-privacy" class="screen">
+        <button class="back-btn" onclick="showScreen('specialists')">
+          ← Назад
+        </button>
+        <h2>🔒 Согласие на обработку данных</h2>
+        <p style="color: #666; margin-bottom: 15px">
+          Для завершения записи необходимо согласие на обработку персональных
+          данных.
+        </p>
+        <p style="margin-bottom: 15px">
+          <a href="../privacy.html" target="_blank" class="document-link">
+            📄 Открыть Политику конфиденциальности
+          </a>
+        </p>
+        <div class="checkbox-container">
+          <input type="checkbox" id="checkbox-privacy" />
+          <label for="checkbox-privacy">
+            Я согласен на обработку персональных данных в соответствии с
+            <a href="../privacy.html" target="_blank" style="color: #f5576c"
+              >Политикой конфиденциальности</a
+            >
+          </label>
         </div>
+        <button class="btn btn-primary" id="btn-to-summary" disabled>
+          Продолжить →
+        </button>
+      </div>
+
+      <!-- Экран 5: Подтверждение -->
+      <div id="screen-summary" class="screen">
+        <button class="back-btn" onclick="showScreen('privacy')">
+          ← Назад
+        </button>
+        <h2>✅ Подтверждение записи</h2>
+        <div class="summary">
+          <div class="summary-item">
+            <span>Услуга:</span>
+            <strong id="summary-service">-</strong>
+          </div>
+          <div class="summary-item">
+            <span>Стоимость:</span>
+            <strong id="summary-price">-</strong>
+          </div>
+          <div class="summary-item">
+            <span>Мастер:</span>
+            <strong id="summary-specialist">-</strong>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-confirm">
+          Подтвердить запись
+        </button>
+      </div>
+
+      <!-- Экран 6: Успех -->
+      <div id="screen-success" class="screen">
+        <div class="success-icon">🎉</div>
+        <h2 style="text-align: center">Вы записаны!</h2>
+        <p style="text-align: center; margin: 20px 0; color: #666">
+          Мы свяжемся с вами для подтверждения записи
+        </p>
+        <button class="btn btn-secondary" onclick="sendToBot()">
+          Вернуться в бот
+        </button>
+      </div>
     </div>
-    
+
     <script>
-        const userData = { service: null, price: null, specialist: null };
-        
-        function showScreen(screenName) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(`screen-${screenName}`).classList.add('active');
-        }
-        
-        // Выбор услуги
-        document.querySelectorAll('.service-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
-                userData.service = this.dataset.service;
-                userData.price = this.dataset.price;
-                document.getElementById('btn-to-specialists').disabled = false;
-            });
+      const userData = { service: null, price: null, specialist: null };
+
+      function showScreen(screenName) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(`screen-${screenName}`).classList.add("active");
+      }
+
+      // Выбор услуги
+      document.querySelectorAll(".service-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          document
+            .querySelectorAll(".service-card")
+            .forEach((c) => c.classList.remove("selected"));
+          this.classList.add("selected");
+          userData.service = this.dataset.service;
+          userData.price = this.dataset.price;
+          document.getElementById("btn-to-specialists").disabled = false;
         });
-        
-        document.getElementById('btn-to-specialists').addEventListener('click', () => showScreen('specialists'));
-        
-        // Выбор мастера
-        document.querySelectorAll('.specialist-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.specialist-card').forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
-                userData.specialist = this.dataset.specialist;
-                document.getElementById('btn-to-privacy').disabled = false;
-            });
+      });
+
+      document
+        .getElementById("btn-to-specialists")
+        .addEventListener("click", () => showScreen("specialists"));
+
+      // Выбор мастера
+      document.querySelectorAll(".specialist-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          document
+            .querySelectorAll(".specialist-card")
+            .forEach((c) => c.classList.remove("selected"));
+          this.classList.add("selected");
+          userData.specialist = this.dataset.specialist;
+          document.getElementById("btn-to-privacy").disabled = false;
         });
-        
-        document.getElementById('btn-to-privacy').addEventListener('click', () => showScreen('privacy'));
-        
-        // Чекбокс политики
-        document.getElementById('checkbox-privacy').addEventListener('change', function() {
-            document.getElementById('btn-to-summary').disabled = !this.checked;
+      });
+
+      document
+        .getElementById("btn-to-privacy")
+        .addEventListener("click", () => showScreen("privacy"));
+
+      // Чекбокс политики
+      document
+        .getElementById("checkbox-privacy")
+        .addEventListener("change", function () {
+          document.getElementById("btn-to-summary").disabled = !this.checked;
         });
-        
-        document.getElementById('btn-to-summary').addEventListener('click', () => {
-            document.getElementById('summary-service').textContent = userData.service;
-            document.getElementById('summary-price').textContent = `${userData.price} ₽`;
-            document.getElementById('summary-specialist').textContent = userData.specialist;
-            showScreen('summary');
+
+      document
+        .getElementById("btn-to-summary")
+        .addEventListener("click", () => {
+          document.getElementById("summary-service").textContent =
+            userData.service;
+          document.getElementById("summary-price").textContent =
+            `${userData.price} ₽`;
+          document.getElementById("summary-specialist").textContent =
+            userData.specialist;
+          showScreen("summary");
         });
-        
-        document.getElementById('btn-confirm').addEventListener('click', () => showScreen('success'));
-        
-        function sendToBot() {
-            console.log('Отправка данных в бот:', userData);
-            alert('Данные отправлены в бот!\n\nУслуга: ' + userData.service + '\nМастер: ' + userData.specialist);
-        }
+
+      document
+        .getElementById("btn-confirm")
+        .addEventListener("click", () => showScreen("success"));
+
+      function sendToBot() {
+        console.log("Отправка данных в бот:", userData);
+        alert(
+          "Данные отправлены в бот!\n\nУслуга: " +
+            userData.service +
+            "\nМастер: " +
+            userData.specialist,
+        );
+      }
     </script>
-</body>
+  </body>
 </html>
