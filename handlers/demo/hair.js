@@ -72,7 +72,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
               [
                 Keyboard.button.link(
                   "📱 Записаться через приложение (с фото)",
-                  "https://imdykman.github.io/max-dialog-bot-leadgen/",
+                  "https://imdykman.github.io/max-dialog-bot-leadgen/hair/",
                 ),
               ],
               [Keyboard.button.callback("⬅️ Назад", "demo_hair")],
