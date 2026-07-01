@@ -125,15 +125,38 @@ async function handleOrderStep(ctx, userId, data, userStates) {
 
     case ORDER_STEPS.CLIENTS_COUNT:
       state.data.clients_count = data;
-      state.step = ORDER_STEPS.NAME;
-      await ctx.reply(`Отлично! Как к вам обращаться? 👤`);
+      state.step = ORDER_STEPS.CONTACT;
+
+      await ctx.reply(
+        `📱 *Оставьте телефон для связи*\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `Нажмите кнопку ниже, чтобы отправить свой контакт:`,
+        {
+          attachments: [
+            Keyboard.inlineKeyboard([
+              [Keyboard.button.requestContact("📱 Отправить контакт")],
+              [Keyboard.button.callback("⬅️ Назад", "order_back")],
+            ]),
+          ],
+        },
+      );
       break;
 
     case ORDER_STEPS.NAME:
       state.data.name = data;
       state.step = ORDER_STEPS.CONTACT;
       await ctx.reply(
-        `Отлично, ${data}! 📱\n\nОставьте телефон для связи (например, +7 909 000 40 77):`,
+        `📱 *Оставьте телефон для связи*\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `Нажмите кнопку ниже, чтобы отправить свой контакт:`,
+        {
+          attachments: [
+            Keyboard.inlineKeyboard([
+              [Keyboard.button.requestContact("📱 Отправить контакт")],
+              [Keyboard.button.callback("⬅️ Назад", "order_back")],
+            ]),
+          ],
+        },
       );
       break;
 
