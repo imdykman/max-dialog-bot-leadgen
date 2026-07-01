@@ -30,6 +30,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
   if (!state.data) state.data = {};
 
   switch (action) {
+    // ========== ВЫБОР УСЛУГИ ==========
     case "demo_hair_haircut":
     case "demo_hair_color":
     case "demo_hair_nails":
@@ -46,8 +47,9 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       };
       const s = services[action];
       state.data = { service: s.name, price: s.price };
+
       await ctx.reply(
-        `${s.emoji} *${s.name}*\n\nОтличный выбор! Стоимость — ${s.price}.\n\nК какому мастеру хотите записаться?`,
+        `${s.emoji} *${s.name}*\n\nОтличный выбор! Стоимость — ${s.price}.\n\n💡 *Вы можете записаться через наше приложение* — там вы увидите фото работ мастеров и сможете выбрать подходящего специалиста.\n\nИли выберите мастера прямо сейчас:`,
         {
           attachments: [
             Keyboard.inlineKeyboard([
@@ -59,7 +61,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
               ],
               [
                 Keyboard.button.callback(
-                  "👨‍🦱 Дмитрий (стаж 8 лет)",
+                  "👨‍ Дмитрий (стаж 8 лет)",
                   "demo_hair_master_dima",
                 ),
               ],
@@ -70,9 +72,9 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
                 ),
               ],
               [
-                Keyboard.button.link(
+                Keyboard.button.callback(
                   "📱 Записаться через приложение (с фото)",
-                  "https://imdykman.github.io/max-dialog-bot-leadgen/hair/",
+                  "demo_hair_app_instruction",
                 ),
               ],
               [Keyboard.button.callback("⬅️ Назад", "demo_hair")],
@@ -82,6 +84,39 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
       );
       break;
     }
+
+    // ========== ИНСТРУКЦИЯ ПО ПРИЛОЖЕНИЮ ==========
+    case "demo_hair_app_instruction":
+      await ctx.reply(
+        `📱 *Запись через приложение*\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+          `✨ *Для входа в приложение:*\n\n` +
+          `1️⃣ Нажмите кнопку **📱 Приложение** в левом нижнем углу экрана\n` +
+          `2️⃣ Выберите услугу и мастера\n` +
+          `3️⃣ Посмотрите фото работ\n` +
+          `4️⃣ Запишитесь онлайн\n\n` +
+          `🎁 *В приложении вы увидите:*\n` +
+          `• 📸 Галерею наших работ\n` +
+          `• 👥 Фото и информацию о мастерах\n` +
+          `• 💰 Актуальные цены\n` +
+          `• ⏰ Свободное время для записи\n\n` +
+          `Это займёт меньше минуты! 💚`,
+        {
+          attachments: [
+            Keyboard.inlineKeyboard([
+              [
+                Keyboard.button.callback(
+                  "⬅️ Назад к выбору мастера",
+                  "demo_hair",
+                ),
+              ],
+            ]),
+          ],
+        },
+      );
+      trackEvent("demo_hair_app_instruction", userId);
+      break;
+
     case "demo_hair_master_anna":
     case "demo_hair_master_dima":
     case "demo_hair_master_elena": {
@@ -90,6 +125,7 @@ async function handleDemoHairStep(ctx, userId, action, userStates) {
         demo_hair_master_dima: "Дмитрий",
         demo_hair_master_elena: "Елена",
       };
+
       state.data.master = masters[action];
       await ctx.reply(
         `👤 *Мастер: ${state.data.master}*\n\nОтлично! Когда вам удобно прийти?`,
