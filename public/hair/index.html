@@ -573,9 +573,6 @@
           console.log("✅ MAX WebApp готов к работе");
           window.WebApp.ready();
           window.WebApp.disableClosingConfirmation();
-          console.log("✅ Подтверждение закрытия отключено");
-        } else {
-          console.log("⚠️ MAX WebApp не найден (режим браузера)");
         }
       });
 
@@ -645,86 +642,21 @@
 
         // Автозакрытие через 1.5 секунды
         setTimeout(() => {
-          console.log("⏰ Автозакрытие через 1.5 секунды");
-
           if (window.WebApp) {
-            console.log("🔄 Закрываем через MAX WebApp.close()");
             window.WebApp.close();
           } else {
-            console.log("⚠️ MAX WebApp не найден, пробуем window.close()");
             window.close();
-            setTimeout(() => {
-              alert(
-                "В режиме браузера приложение не может закрыться автоматически.\n\nЗакройте его вручную.",
-              );
-            }, 500);
           }
         }, 1500);
       });
 
       // Кнопка "Вернуться в бот" (fallback)
       function sendToBot() {
-        console.log("📤 sendToBot вызван");
-
         if (window.WebApp) {
-          console.log("🔄 Закрываем через MAX WebApp.close()");
           window.WebApp.close();
         } else {
-          console.log("⚠️ MAX WebApp не найден");
           window.close();
-          setTimeout(() => {
-            alert(
-              "В режиме браузера приложение не может закрыться автоматически.\n\nЗакройте его вручную.",
-            );
-          }, 500);
         }
-      }
-    </script>
-    <!-- Блок для отладочных логов (можно удалить после тестирования) -->
-    <div
-      id="debug-log"
-      style="
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        max-height: 200px;
-        overflow-y: auto;
-        background: rgba(0, 0, 0, 0.9);
-        color: #0f0;
-        font-family: monospace;
-        font-size: 11px;
-        padding: 10px;
-        z-index: 9999;
-        display: none;
-      "
-    ></div>
-
-    <!-- Кнопка для показа/скрытия логов -->
-    <button
-      onclick="toggleDebugLog()"
-      style="
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: #333;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        z-index: 10000;
-        cursor: pointer;
-      "
-    >
-      🐛 Логи
-    </button>
-
-    <script>
-      function toggleDebugLog() {
-        const logDiv = document.getElementById("debug-log");
-        logDiv.style.display =
-          logDiv.style.display === "none" ? "block" : "none";
       }
     </script>
   </body>
