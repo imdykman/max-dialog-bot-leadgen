@@ -224,6 +224,10 @@ async function handleOrderStep(ctx, userId, data, userStates) {
       state.data.call_time = data;
 
       await saveLead(userId, state.data);
+      console.log(
+        `📧 Отправляем email с данными:`,
+        JSON.stringify(state.data, null, 2),
+      );
       await sendManagerEmail(state.data);
       await showThankYou(ctx, state.data);
 

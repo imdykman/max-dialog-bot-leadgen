@@ -1,12 +1,23 @@
 async function sendManagerEmail(data) {
+  console.log(`\n📧 ========== НАЧАЛО ОТПРАВКИ EMAIL ==========`);
+  console.log(`📧 Данные лида:`, JSON.stringify(data, null, 2));
+  
   if (!process.env.SMTP_USER || !process.env.MANAGER_EMAIL) {
     console.log('⚠️ Email не настроен, пропускаем отправку');
+    console.log(`📧 SMTP_USER: ${process.env.SMTP_USER || 'НЕ УСТАНОВЛЕН'}`);
+    console.log(`📧 MANAGER_EMAIL: ${process.env.MANAGER_EMAIL || 'НЕ УСТАНОВЛЕН'}`);
     return;
   }
+
+  console.log(`📧 SMTP_USER: ${process.env.SMTP_USER}`);
+  console.log(`📧 MANAGER_EMAIL: ${process.env.MANAGER_EMAIL}`);
+  console.log(`📧 SMTP_HOST: ${process.env.SMTP_HOST}`);
+  console.log(`📧 SMTP_PORT: ${process.env.SMTP_PORT}`);
   
   try {
     const nodemailer = require('nodemailer');
     
+    console.log(`📧 Создаём transporter...`);
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT),
@@ -17,7 +28,9 @@ async function sendManagerEmail(data) {
       }
     });
     
-    await transporter.sendMail({
+    console.log(`📧 Transporter создан, отправляем письмо...`);
+    
+    const info = await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: process.env.MANAGER_EMAIL,
       subject: `🔥 Новый лид: ${data.name}`,
@@ -37,8 +50,16 @@ async function sendManagerEmail(data) {
     });
     
     console.log(`✅ Email отправлен менеджеру: ${process.env.MANAGER_EMAIL}`);
-  } catch (e) {
-    console.error('Ошибка отправки email:', e);
+    console.log(`📧 Message ID: ${info.messageId}`);
+    console.log(`📧 ========== КОНЕЦ ОТПРАВКИ EMAIL ==========\n`);
+  } catch (error) {
+    console.error(`\n❌ ========== ОШИБКА ОТПРАВКИ EMAIL ==========`);
+    console.error(`❌ Ошибка:`, error.message);
+    console.error(`❌ Код ошибки:`, error.code);
+    console.error(`❌ Команда:`, error.command);
+    console.error(`❌ Полный объект ошибки:`, error);
+    console.error(`❌ Stack trace:`, error.stack);
+    console.error(`❌ ==========================================\n`);
   }
 }
 
