@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Салон красоты "Стиль" — Онлайн-запись</title>
+    <!-- MAX Bridge SDK -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
     <style>
       * {
         margin: 0;
@@ -629,12 +632,34 @@
 
       function sendToBot() {
         console.log("Отправка данных в бот:", userData);
-        alert(
-          "Данные отправлены в бот!\n\nУслуга: " +
-            userData.service +
-            "\nМастер: " +
-            userData.specialist,
-        );
+
+        // Показываем экран успеха
+        showScreen("success");
+
+        // Через 1.5 секунды закрываем приложение
+        setTimeout(() => {
+          try {
+            // Отправляем данные в бот и закрываем приложение
+            if (window.vkBridge) {
+              vkBridge.send("VKWebAppClose", {
+                status: "success",
+                payload: {
+                  type: "booking",
+                  service: userData.service,
+                  price: userData.price,
+                  specialist: userData.specialist,
+                },
+              });
+            } else {
+              // Fallback для браузера
+              window.close();
+            }
+          } catch (error) {
+            console.error("Ошибка закрытия приложения:", error);
+            // Если не удалось закрыть — просто закрываем окно
+            window.close();
+          }
+        }, 1500);
       }
     </script>
   </body>
